@@ -72,3 +72,7 @@ npm start
 
 - перевірка: ./golangci-lint run ./...
 - Авто-виправлення (де можливо): ./golangci-lint run --fix ./...
+
+### Codecov.io
+
+[![Codecov](https://codecov.io/gh/ваш-юзернейм/snake-game/branch/main/graph/badge.svg)](https://codecov.io/gh/ваш-юзернейм/snake-game)
