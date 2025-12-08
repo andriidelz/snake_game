@@ -1,0 +1,13 @@
+require_relative '../node_modules/@expo/cli/node_modules/@expo/config-plugins/ios/utils.rb'
+
+platform :ios, '13.4'
+
+target 'SnakeGame' do
+  use_expo_modules!
+  config = use_native_modules!
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => true
+  )
+end

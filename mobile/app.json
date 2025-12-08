@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Snake Game",
+    "slug": "snake-game",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/icon.png",
+    "splash": {
+      "image": "./assets/icons/splash.png",
+      "backgroundColor": "#064e3b"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.snakegame.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#064e3b"
+      },
+      "package": "com.snakegame.mobile"
+    },
+    "web": {
+      "favicon": "./assets/icons/favicon.png"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+# Expo
+.expo/
+.expo-shared/
+
+# Node
+node_modules/
+npm-debug.*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# React Native
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# macOS
+.DS_Store
+
+# Android
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/app/build/
+
+# iOS
+ios/Pods/
+ios/Podfile.lock
+ios/build/
+
+# Env
+.env
+.vscode/
+contracts/contracts/.env
+.env.local
+.env.*.local
+
+# Go
+/.golangci.yml
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@walletconnect/modal-react-native": "^1.1.0",
+    "@walletconnect/react-native-compat": "^2.23.0",
+    "@web3modal/wagmi-react-native": "^2.0.5",
+    "ethers": "^6.15.0",
+    "expo": "^54.0.25",
+    "expo-av": "~16.0.7",
+    "lucide-react-native": "^0.555.0",
+    "viem": "^2.40.3",
+    "wagmi": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7"
+  }
+}

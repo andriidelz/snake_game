@@ -1,0 +1,49 @@
+version: 1
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - errcheck
+    - gofmt
+    - goimports
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - typecheck
+    - unused
+    - wastedassign
+
+linters-settings:
+  govet:
+    enable-all: true
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  revive:
+    rules:
+      - name: var-naming
+      - name: package-comments
+        severity: error
+  staticcheck:
+    checks: ["all"]
+  gosec:
+    excludes:
+      - G404  # слабкий rand в іграх — ок
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
