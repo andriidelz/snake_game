@@ -53,22 +53,22 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 		)`,
 
 		`CREATE TABLE IF NOT EXISTS tournaments (
-            id VARCHAR(36) PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            max_players INT NOT NULL,
-            prize TEXT,
-            start_time TIMESTAMP NOT NULL,
-            end_time TIMESTAMP NOT NULL,
-            status VARCHAR(20) DEFAULT 'waiting',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`,
+		    id VARCHAR(36) PRIMARY KEY,
+		    name VARCHAR(100) NOT NULL,
+		    max_players INT NOT NULL,
+		    prize TEXT,
+		    start_time TIMESTAMP NOT NULL,
+		    end_time TIMESTAMP NOT NULL,
+		    status VARCHAR(20) DEFAULT 'waiting',
+		    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)`,
 
 		`CREATE TABLE IF NOT EXISTS tournament_players (
-            tournament_id VARCHAR(36) REFERENCES tournaments(id) ON DELETE CASCADE,
-            player_id VARCHAR(100),
-            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (tournament_id, player_id)
-        )`,
+		    tournament_id VARCHAR(36) REFERENCES tournaments(id) ON DELETE CASCADE,
+		    player_id VARCHAR(100),
+		    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		    PRIMARY KEY (tournament_id, player_id)
+		)`,
 	}
 
 	for _, tbl := range tables {

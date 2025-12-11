@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -10,6 +11,18 @@ import (
 
 	"github.com/google/uuid"
 )
+
+type Tournament struct {
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Type         string    `json:"type,omitempty"`
+	MaxPlayers   int       `json:"max_players"`
+	Prize        string    `json:"prize"`
+	StartTime    time.Time `json:"start_time"`
+	EndTime      time.Time `json:"end_time"`
+	Status       string    `json:"status"`
+	Participants int       `json:"participants"`
+}
 
 type CreateTournamentRequest struct {
 	Name       string `json:"name"`
@@ -56,6 +69,41 @@ func CreateTournament(store *storage.PostgresStorage) http.HandlerFunc {
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(t)
 	}
+}
+
+func GetActiveTournaments(db *sql.DB) ([]Tournament, error) {
+	query := `
+		SELECT
+			t.id, t.name, COALESCE(t.type, 'classic') as type,
+			t.start_time, t.end_time,
+			t.max_players, t.prize, t.status,
+			COUNT(tp.player_id) as participants
+		FROM tournaments t
+		LEFT JOIN tournament_players tp ON t.id = tp.tournament_id
+		WHERE t.status IN ('waiting', 'active')
+		GROUP BY t.id
+		ORDER BY t.start_time ASC
+	`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tournaments []Tournament
+	for rows.Next() {
+		var t Tournament
+		if err := rows.Scan(
+			&t.ID, &t.Name, &t.Type,
+			&t.StartTime, &t.EndTime,
+			&t.MaxPlayers, &t.Prize, &t.Status, &t.Participants,
+		); err != nil {
+			return nil, err
+		}
+		tournaments = append(tournaments, t)
+	}
+	return tournaments, nil
 }
 
 func JoinTournament(store *storage.PostgresStorage) http.HandlerFunc {

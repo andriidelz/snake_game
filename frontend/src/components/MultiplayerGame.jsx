@@ -72,7 +72,11 @@ const MultiplayerGame = ({ playerID, roomID }) => {
 
   return (
     <div className="bg-white/5 backdrop-blur rounded-lg p-6">
-      {/* Controls (similar to Game.jsx) */}
+      {/* ОНЛАЙН ГРАВЦІ — ОНОВЛЕНО! */}
+    <h2 className="text-4xl text-yellow-400 mb-4 font-bold text-center">
+      Мультиплеєр • <span className="text-pink-400 animate-pulse">{Object.keys(snakes).length}</span> онлайн
+    </h2>
+      {/* КНОПКИ (схоже до Game.jsx) */}
       <div className="flex justify-center gap-4 mb-4">
         {!isPlaying && !gameOver && (
           <button

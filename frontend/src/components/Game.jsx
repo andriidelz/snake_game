@@ -30,6 +30,7 @@ const Game = ({ onStatsUpdate, skin = { color: '#10b981' } }) => {
   const [gameOver, setGameOver] = useState(false);
   const [speed, setSpeed] = useState(INITIAL_SPEED);
   const [showAdBreak, setShowAdBreak] = useState(false);
+  const [showRewardedAd, setShowRewardedAd] = useState(false);
   const [gamesPlayed, setGamesPlayed] = useState(0);
   const [playerID] = useState(() => 'player_' + Math.random().toString(36).substr(2, 9));
   const [powerups, setPowerups] = useState([]);  
@@ -277,6 +278,20 @@ const Game = ({ onStatsUpdate, skin = { color: '#10b981' } }) => {
     canChangeDirection.current = true;    
   };
 
+  const watchAdForReward = () => {
+    setShowRewardedAd(true);
+
+    // Імітуємо 30-секундну рекламу (для тесту — 3 секунди)
+    setTimeout(() => {
+      // НАГОРОДА!
+      setScore(s => s + 100);
+      sound.play('achievement');
+      setIsPlaying(true);
+      setGameOver(false);
+      setShowRewardedAd(false);
+    }, 3000); // 3 секунди для тесту — в проді буде 30 сек
+  };
+
   const pauseGame = () => {
     sound.play('button-click');
     setIsPlaying(false);
@@ -406,11 +421,11 @@ const Game = ({ onStatsUpdate, skin = { color: '#10b981' } }) => {
             </div>
           ))}
           {gameOver && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg">
-              <div className="text-center">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/90 rounded-lg z-50">
+              <div className="text-center space-y-6">
                 <div className="text-6xl mb-4">💀</div>
                 <div className="text-white text-3xl font-bold mb-2">GAME OVER!</div>
-                <div className="text-green-400 text-xl mb-4">Рахунок: {score}</div>
+                <div className="text-green-400 text-2xl mb-8">Рахунок: {score}</div>
                 <button
                   onClick={resetGame}
                   className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 mx-auto"
@@ -444,6 +459,12 @@ const Game = ({ onStatsUpdate, skin = { color: '#10b981' } }) => {
           </button>
         )}
         <button
+              onClick={watchAdForReward}
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-10 py-5 rounded-2xl font-bold text-2xl shadow-2xl transform hover:scale-110 transition-all mb-6"
+            >
+              Revive +100 очок за рекламу
+            </button>
+        <button
           onClick={resetGame}
           className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2"
         >
@@ -455,6 +476,15 @@ const Game = ({ onStatsUpdate, skin = { color: '#10b981' } }) => {
         Керування: ← → ↑ ↓ або W A S D
       </div>
       {/* Ad Break Modal */}
+      {showRewardedAd && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-50 text-white text-center">
+          <div className="space-y-4">
+            <div className="text-4xl animate-pulse">📺</div>
+            <div className="text-2xl font-bold">Перегляд реклами...</div>
+            <div className="text-lg opacity-70">Після завершення ти отримаєш +100 очок</div>
+          </div>
+      </div>
+      )}
       {showAdBreak && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-8 max-w-md text-center">

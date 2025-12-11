@@ -1,0 +1,12 @@
+{
+  "plugins": [
+    "expo-ads-admob",
+    "react-native-google-mobile-ads"
+  ],
+  "android": {
+    "package": "com.anonymous.snake_game"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.snake-game"
+  }
+}

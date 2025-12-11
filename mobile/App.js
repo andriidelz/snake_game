@@ -7,6 +7,7 @@ import { polygon, sepolia } from 'wagmi/chains';
 import { walletConnect } from 'wagmi/connectors';
 
 import { sound } from './src/utils/sound';
+import { register } from 'prom-client';
 
 const projectId = 'твій_project_id_тут'; // ← Замінить хзвичайно ж на свій
 
@@ -57,6 +58,16 @@ useEffect(() => {
     loadSounds();
   }, []);
 
+  if (__DEV__) {
+  const metricsServer = http.createServer(async (req, res) => {
+    if (req.url === '/metrics') {
+      res.setHeader('Content-Type', register.contentType);
+      res.end(await register.metrics());
+    }
+  });
+  metricsServer.listen(8081);
+}
+
   return (
     <WagmiProvider config={wagmiConfig.wagmiConfig}>
       <Web3Modal />
@@ -66,7 +77,8 @@ useEffect(() => {
             {props => <Game {...props} playerID={playerID} />}
           </Stack.Screen>
           <Stack.Screen name="Multiplayer" component={MultiplayerGame} options={{ title: 'Мультиплеєр' }} />
-          <Stack.Screen name="Tournament" component={Tournament} options={{ title: 'Турнір' }} />
+          <Stack.Screen name="Tournament" component={Tournament} options={{ title: 'Турніри' }} />
+            {() => <Tournaments playerID={playerID} />}
           <Stack.Screen name="Leaderboard" component={Leaderboard} options={{ title: 'Лідери' }} />
           <Stack.Screen name="Achievements">
             {() => <Achievements playerID={playerID} />}

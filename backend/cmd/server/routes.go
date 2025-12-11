@@ -32,6 +32,11 @@ func SetupRoutes(r *mux.Router, store *storage.PostgresStorage) {
 	api.HandleFunc("/achievements", handlers.GetAchievements(store)).Methods("GET")
 	api.HandleFunc("/multiplayer/ws", handlers.MultiplayerWS(store)).Methods("GET")
 	api.HandleFunc("/skins", handlers.GetSkins).Methods("GET")
+	api.HandleFunc("/mint-info", handlers.GetMintInfo).Methods("GET")
+	api.HandleFunc("/tournaments", handlers.GetTournaments(store)).Methods("GET")
+	api.HandleFunc("/tournament/create", handlers.CreateTournament(store)).Methods("POST")
+	api.HandleFunc("/tournament/join", handlers.JoinTournament(store)).Methods("POST")
+	api.HandleFunc("/metrics/mobile", handlers.MobileMetrics).Methods("POST")
 
 	protected := r.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.Auth)

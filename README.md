@@ -19,13 +19,16 @@
 - Tailwind CSS
 - Lucide Icons
 - Fetch API
+- Vite
 
 **Backend:**
 
-- Go 1.21
+- Go 1.24
 - Gorilla Mux
 - PostgreSQL
 - CORS middleware
+- Grafana
+- Prometheus
 
 ## 🛠 Встановлення
 
@@ -68,6 +71,16 @@ npm install
 npm start
 ```
 
+**Mobile:**
+
+```bash
+cd mobile && expo start - локально тестувати
+eas build --platform android - зібрати АРК (Android)
+eas build --platform ios - Зібрати IPA (iOS)
+```
+
+- Опублікувати в сториЧерез Expo Application Services (EAS)
+
 ### Linters
 
 - перевірка: ./golangci-lint run ./...
@@ -76,3 +89,17 @@ npm start
 ### Codecov.io
 
 [![Codecov](https://codecov.io/gh/ваш-юзернейм/snake-game/branch/main/graph/badge.svg)](https://codecov.io/gh/ваш-юзернейм/snake-game)
+
+### K6 Grafana
+
+- <http://localhost:3000>
+- docker-compose run --rm k6
+- docker-compose up -d postgres backend grafana
+- docker-compose run --rm k6 run /scripts/load-test.js
+
+### Prometheus
+
+- <http://localhost:9090>
+- docker-compose up -d prometheus grafana
+- docker-compose up -d backend prometheus grafana
+- docker-compose up -d backend frontend nginx prometheus grafana
