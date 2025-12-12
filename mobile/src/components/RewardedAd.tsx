@@ -136,20 +136,3 @@ const styles = StyleSheet.create({
   watchText: { color: 'white', fontSize: 20, fontWeight: 'bold' },
   skip: { color: '#94a3b8', fontSize: 16 },
 });
-
-
-//  const showRealAd = () => {
-//     => {
-//     setLoading(true);
-
-//     // ПОТІМ ВСТАВИТИ СЮДИ МІЙ КОД ВІД ADSENSE!!!
-//     (window.adsbygoogle = window.adsbygoogle || []).push({
-//       google_ad_client: "ca-pub-XXXXXXXXXXXXXXXX", // ← твій ID
-//       overlay: true,
-//       onReward: () => {
-//         onReward(); // +100 очок
-//         setLoading(false);
-//         onClose?.();
-//       }
-//     });
-//   };
