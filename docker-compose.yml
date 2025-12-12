@@ -64,10 +64,6 @@ services:
     restart: unless-stopped
     networks:
       - snake-net
-
-  networks:
-    snake-net:
-      driver: bridge
   
   prometheus:
     image: prom/prometheus:latest
@@ -109,6 +105,11 @@ services:
     networks:
       - snake-net
     command: run /scripts/load-test.js
-    
-  volumes:
-    postgres_data:
+
+networks:
+  snake-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  grafana_data:

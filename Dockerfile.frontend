@@ -1,12 +1,12 @@
 FROM node:20-alpine AS builder
 
-RUN apk add --no-cache libc6-compat
-RUN adduser -D -g '' appuser
+RUN apk add --no-cache libc6-compat python3 make g++
+# RUN adduser -D -g '' appuser
 
 WORKDIR /app
 
 COPY frontend/package*.json ./
-RUN npm ci --only=production --frozen-lockfile && npm cache clean --force
+RUN npm ci 
 
 COPY frontend/ ./
 
@@ -16,16 +16,19 @@ RUN npm run build
 FROM nginx:alpine AS runtime
 RUN rm -rf /etc/nginx/conf.d/*
 
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-USER appuser
+# COPY --from=builder /etc/passwd /etc/passwd
+# COPY --from=builder /etc/group /etc/group
+# USER appuser
 
 EXPOSE 80
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost || exit 1
+
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
