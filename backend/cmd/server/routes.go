@@ -26,6 +26,7 @@ func SetupRoutes(r *mux.Router, store *storage.PostgresStorage) {
 	r.Handle("/metrics", promhttp.Handler()).Methods("GET")
 
 	api := r.PathPrefix("/api").Subrouter()
+
 	api.HandleFunc("/health", handlers.HealthCheck).Methods("GET")
 	api.HandleFunc("/leaderboard", handlers.GetLeaderboard(store)).Methods("GET")
 	api.HandleFunc("/stats", handlers.GetStats(store)).Methods("GET")
@@ -37,6 +38,7 @@ func SetupRoutes(r *mux.Router, store *storage.PostgresStorage) {
 	api.HandleFunc("/tournament/create", handlers.CreateTournament(store)).Methods("POST")
 	api.HandleFunc("/tournament/join", handlers.JoinTournament(store)).Methods("POST")
 	api.HandleFunc("/metrics/mobile", handlers.MobileMetrics).Methods("POST")
+	api.HandleFunc("/mint", handlers.HandleNFTMint(store)).Methods("POST")
 
 	protected := r.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.Auth)

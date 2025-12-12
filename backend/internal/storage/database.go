@@ -69,6 +69,14 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 		    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		    PRIMARY KEY (tournament_id, player_id)
 		)`,
+
+		`CREATE TABLE IF NOT EXISTS player_minted_skins (
+			player_id VARCHAR(100) NOT NULL,
+			skin_name VARCHAR(100) NOT NULL,
+			tx_hash VARCHAR(255),
+			minted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (player_id, skin_name)
+		)`,
 	}
 
 	for _, tbl := range tables {
@@ -244,6 +252,16 @@ func (s *PostgresStorage) getTournamentsByStatus(status string) ([]models.Tourna
 		tournaments = append(tournaments, t)
 	}
 	return tournaments, nil
+}
+
+func (s *PostgresStorage) SaveMintedSkin(playerID, skinName, txHash string) error {
+	query := `
+		INSERT INTO player_minted_skins (player_id, skin_name, tx_hash)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (player_id, skin_name) DO UPDATE SET tx_hash = EXCLUDED.tx_hash
+	`
+	_, err := s.db.Exec(query, playerID, skinName, txHash)
+	return err
 }
 
 func (s *PostgresStorage) GetPlayerNFTs(playerID string) []string {

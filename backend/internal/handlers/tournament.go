@@ -8,6 +8,7 @@ import (
 
 	"snake-game/backend/internal/models"
 	"snake-game/backend/internal/storage"
+	"snake-game/backend/internal/telemetry/metrics"
 
 	"github.com/google/uuid"
 )
@@ -48,6 +49,8 @@ func CreateTournament(store *storage.PostgresStorage) http.HandlerFunc {
 			http.Error(w, `{"error": "Invalid tournament parameters"}`, http.StatusBadRequest)
 			return
 		}
+
+		metrics.IncTournamentCreated()
 
 		t := models.Tournament{
 			ID:         uuid.New().String(),
