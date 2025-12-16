@@ -26,7 +26,7 @@ export default function RewardedAd({ onReward, onClose }) {
       }, 500);
         setTimeout(() => {
           clearInterval(checkReady);
-          setIsLoading(false); // на випадок таймауту
+          setIsLoading(false); // for timeout accidence
         }, 10000);
       }
     };

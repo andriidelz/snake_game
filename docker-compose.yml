@@ -97,7 +97,7 @@ services:
     networks:
       - snake-net
 
-  # k6 — для локальних тестів (не обов’язково в проді)
+  # k6 — for local tests, but it is not necessary in prod
   k6:
     image: grafana/k6:latest
     volumes:

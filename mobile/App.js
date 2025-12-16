@@ -9,7 +9,7 @@ import { walletConnect } from 'wagmi/connectors';
 import { sound } from './src/utils/sound';
 import { register } from 'prom-client';
 
-const projectId = 'твій_project_id_тут'; // ← Замінить хзвичайно ж на свій
+const projectId = 'твій_project_id_тут'; // ← change for your own one of course  
 
 const wagmiConfig = {
   projectId,
@@ -48,7 +48,7 @@ useEffect(() => {
       try {
         await sound.load();
         console.log('Всі звуки завантажено!');
-        // Опціонально: граємо легкий "стартовий" звук
+        // Optionally: play light "start" sound 
         // await sound.play('achievement');
       } catch (error) {
         console.warn('Не вдалося завантажити звуки:', error);

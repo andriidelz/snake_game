@@ -1,7 +1,6 @@
 let ws = null;
 
 export const connectWS = (room, player, onMessage) => {
-  // Беремо з .env — працює і локально, і в продакшні
   const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8080/api/multiplayer/ws';
   
   ws = new WebSocket(`${WS_URL}?room=${room}&player=${player}`);
