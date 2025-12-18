@@ -6,17 +6,23 @@ RUN apk add --no-cache libc6-compat python3 make g++
 WORKDIR /app
 
 COPY frontend/package*.json ./
-RUN npm ci 
+RUN npm ci
 
-COPY frontend/ ./
+# COPY frontend/ ./
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/index.html ./
+COPY frontend/vite.config.* ./
+COPY frontend/tsconfig*.json ./
+COPY frontend/.env ./ 
 
 ENV NODE_ENV=production
 RUN npm run build
 
 FROM nginx:alpine AS runtime
-RUN rm -rf /etc/nginx/conf.d/*
+RUN rm -rf /etc/nginx/nginx.conf /etc/nginx/conf.d/*
 
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # COPY --from=builder /etc/passwd /etc/passwd

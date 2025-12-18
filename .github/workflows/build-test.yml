@@ -16,7 +16,7 @@ jobs:
         image: postgres:15-alpine
         env:
           POSTGRES_USER: snake
-          POSTGRES_PASSWORD: snake123
+          POSTGRES_PASSWORD: snakepass
           POSTGRES_DB: snake_game
         ports:
           - 5432:5432
@@ -43,6 +43,11 @@ jobs:
             sleep 2
           done
 
+      - name: Run migrations
+        run: |
+          cd backend
+          go run migrate.go
+
       - name: Build backend
         run: |
           cd backend
@@ -50,7 +55,7 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          DATABASE_URL: postgres://snake:snake123@localhost:5432/snake_game?sslmode=disable
+          DATABASE_URL: postgres://snake:snakepass@localhost:5432/snake_game?sslmode=disable
         run: |
           cd backend
           go test -v -race -covermode=atomic -coverprofile=coverage.out ./...

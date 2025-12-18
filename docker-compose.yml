@@ -12,11 +12,12 @@ services:
       - DB_USER=snake
       - DB_PASS=snakepass
       - DB_NAME=snakedb
-      - DATABASE_URL=postgres://snake:snake123@postgres:5432/snake_game?sslmode=disable
+      - DATABASE_URL=postgres://snake:snakepass@postgres:5432/snakedb?sslmode=disable
       - SENTRY_DSN=${SENTRY_DSN:-}
-      - ENV=production
+      - ENV=production    
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - snake-net  
@@ -28,8 +29,8 @@ services:
     ports:
       - "80:80"
     environment:
-      - VITE_API_URL=http://backend:8080/api
-      - VITE_WS_URL=ws://backend:8080/api/multiplayer/ws
+      - VITE_API_URL=/api
+      - VITE_WS_URL=/api/multiplayer/ws
     depends_on:
       - backend
     restart: unless-stopped
@@ -46,22 +47,45 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U snake -d snakedb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
     restart: unless-stopped
     networks:
       - snake-net
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./certs:/etc/nginx/certs:ro
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   restart: unless-stopped
+  #   networks:
+  #     - snake-net
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      - DATABASE_URL=postgres://snake:snakepass@postgres:5432/snakedb?sslmode=disable
     depends_on:
-      - frontend
-      - backend
-    restart: unless-stopped
+      postgres:
+        condition: service_healthy
+    command: go run backend/migrate.go
     networks:
       - snake-net
   
@@ -102,6 +126,9 @@ services:
     image: grafana/k6:latest
     volumes:
       - ./k6:/scripts
+    depends_on:
+      backend:
+        condition: service_started
     networks:
       - snake-net
     command: run /scripts/load-test.js

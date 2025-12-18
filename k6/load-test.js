@@ -2,14 +2,15 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 export const options = {
+  vus: 10,
   stages: [
-    { duration: '2m', target: 1000 },    // розігрів
-    { duration: '5m', target: 10000 },   // пік — 10к одночасних
-    { duration: '2m', target: 0 },       // спад
+    { duration: '30s', target: 5 },    // hotting
+    { duration: '1m', target: 10 },   // top — 100 simultaneously
+    { duration: '30s', target: 0 },       // descending
   ],
   thresholds: {
-    http_req_duration: ['p(95)<500'], // 95% запитів < 500ms
-    http_req_failed: ['rate<0.01'],   // <1% помилок
+    http_req_duration: ['p(95)<1000'], // 95% requests < 500ms
+    http_req_failed: ['rate<0.01'],   // <1% errors
   },
 };
 

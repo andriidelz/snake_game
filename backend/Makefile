@@ -26,7 +26,11 @@ web-build:
 mobile:
 	cd mobile && expo start
 
+migrate:
+	docker-compose run --rm migrate
+
 up:
+	make migrate
 	docker-compose up -d
 
 down:

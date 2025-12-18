@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/',
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],  // для React файлів
+  },
   server: {
     port: 3000,
     host: true, // важливо для Docker і мобілки

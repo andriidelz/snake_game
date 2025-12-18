@@ -61,3 +61,29 @@ export const getAchievements = async (playerID) => {
     return [];
   }
 };
+
+export const getTournaments = async () => {
+  try {
+    const response = await fetch(`${API_URL}/tournaments`);
+    if (!response.ok) throw new Error('Failed to fetch tournaments');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching tournaments:', error);
+    throw error;
+  }
+};
+
+export const joinTournament = async (tournamentId, playerId) => {
+  try {
+    const response = await fetch(`${API_URL}/tournaments/${tournamentId}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player_id: playerId }),
+    });
+    if (!response.ok) throw new Error('Failed to join tournament');
+    return await response.json();
+  } catch (error) {
+    console.error('Error joining tournament:', error);
+    throw error;
+  }
+};

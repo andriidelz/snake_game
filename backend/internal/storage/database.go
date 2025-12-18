@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"time"
 
 	"snake-game/backend/internal/models"
 
@@ -17,72 +18,14 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db.SetMaxOpenConns(20) // max amount of contemporary connections
+	db.SetMaxIdleConns(10) // idle in pool
+	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxIdleTime(1 * time.Minute)
+
 	if err := db.Ping(); err != nil {
 		return nil, err
-	}
-
-	tables := []string{
-
-		`CREATE TABLE IF NOT EXISTS scores (
-            id SERIAL PRIMARY KEY,
-            player_id VARCHAR(100) NOT NULL,
-            score INT NOT NULL,
-            length INT NOT NULL,
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`,
-
-		`CREATE TABLE IF NOT EXISTS achievements (
-            id SERIAL PRIMARY KEY,
-            player_id VARCHAR(100) NOT NULL,
-            name VARCHAR(100) NOT NULL,
-            description TEXT,
-            icon VARCHAR(50),
-            unlocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(player_id, name)
-        )`,
-		// Wallets (NFT)
-		`CREATE TABLE IF NOT EXISTS wallets (
-            player_id VARCHAR(100) PRIMARY KEY,
-            wallet VARCHAR(255)
-        )`,
-		`
-		CREATE TABLE IF NOT EXISTS player_skins (
-			player_id VARCHAR(100),
-			skin_name VARCHAR(50),
-			PRIMARY KEY (player_id, skin_name)
-		)`,
-
-		`CREATE TABLE IF NOT EXISTS tournaments (
-		    id VARCHAR(36) PRIMARY KEY,
-		    name VARCHAR(100) NOT NULL,
-		    max_players INT NOT NULL,
-		    prize TEXT,
-		    start_time TIMESTAMP NOT NULL,
-		    end_time TIMESTAMP NOT NULL,
-		    status VARCHAR(20) DEFAULT 'waiting',
-		    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-		)`,
-
-		`CREATE TABLE IF NOT EXISTS tournament_players (
-		    tournament_id VARCHAR(36) REFERENCES tournaments(id) ON DELETE CASCADE,
-		    player_id VARCHAR(100),
-		    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		    PRIMARY KEY (tournament_id, player_id)
-		)`,
-
-		`CREATE TABLE IF NOT EXISTS player_minted_skins (
-			player_id VARCHAR(100) NOT NULL,
-			skin_name VARCHAR(100) NOT NULL,
-			tx_hash VARCHAR(255),
-			minted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			PRIMARY KEY (player_id, skin_name)
-		)`,
-	}
-
-	for _, tbl := range tables {
-		if _, err := db.Exec(tbl); err != nil {
-			return nil, err
-		}
 	}
 
 	return &PostgresStorage{db: db}, nil
@@ -224,16 +167,38 @@ func (s *PostgresStorage) getTournamentsByStatus(status string) ([]models.Tourna
 
 	if status == "" {
 		rows, err = s.db.Query(`
-            SELECT id, name, max_players, prize, start_time, end_time, status
-            FROM tournaments
-            ORDER BY created_at DESC
+            SELECT
+				t.id,
+				t.name,
+				t.max_players,
+				t.prize,
+				t.start_time,
+				t.end_time,
+				t.status,
+				COUNT(tp.player_id) AS current_players
+			FROM tournaments t
+			LEFT JOIN tournament_players tp
+				ON tp.tournament_id = t.id
+			GROUP BY t.id
+			ORDER BY t.created_at DESC
         `)
 	} else {
 		rows, err = s.db.Query(`
-            SELECT id, name, max_players, prize, start_time, end_time, status
-            FROM tournaments
-            WHERE status = $1
-            ORDER BY created_at DESC
+            SELECT
+				t.id,
+				t.name,
+				t.max_players,
+				t.prize,
+				t.start_time,
+				t.end_time,
+				t.status,
+				COUNT(tp.player_id) AS current_players
+			FROM tournaments t
+			LEFT JOIN tournament_players tp
+				ON tp.tournament_id = t.id
+			WHERE t.status = $1
+			GROUP BY t.id
+			ORDER BY t.created_at DESC
         `, status)
 	}
 	if err != nil {
@@ -244,11 +209,11 @@ func (s *PostgresStorage) getTournamentsByStatus(status string) ([]models.Tourna
 	var tournaments []models.Tournament
 	for rows.Next() {
 		var t models.Tournament
-		if err := rows.Scan(&t.ID, &t.Name, &t.MaxPlayers, &t.Prize, &t.StartTime, &t.EndTime, &t.Status); err != nil {
+		if err := rows.Scan(&t.ID, &t.Name, &t.MaxPlayers, &t.Prize, &t.StartTime, &t.EndTime, &t.Status, &t.CurrentPlayers); err != nil {
 			return nil, err
 		}
 
-		s.db.QueryRow(`SELECT COUNT(*) FROM tournament_players WHERE tournament_id = $1`, t.ID).Scan(&t.CurrentPlayers)
+		// s.db.QueryRow(`SELECT COUNT(*) FROM tournament_players WHERE tournament_id = $1`, t.ID).Scan(&t.CurrentPlayers)
 		tournaments = append(tournaments, t)
 	}
 	return tournaments, nil

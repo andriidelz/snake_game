@@ -4,7 +4,7 @@ import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mo
 import { AdEventType } from 'react-native-google-mobile-ads';
 import { sound } from '../utils/sound';
 
-const AD_UNIT_ID = __DEV__ ? TestIds.REWARDED : 'міЙ-реальний-id';
+const AD_UNIT_ID = __DEV__ ? TestIds.REWARDED : 'mY-real-id';
 
 interface Props {
   visible: boolean;
@@ -46,7 +46,7 @@ export default function RewardedAdComponent({ visible, onReward, onClose }: Prop
       (reward) => {
         console.log('User earned reward!', reward);
         sound.play('achievement');
-        Alert.alert('Вітаємо!', 'Ти отримав 100 очок + REVIVE!');
+        Alert.alert('Congratulations!', 'You got 100 scores + REVIVE!');
         onReward();
       }
     );
@@ -58,7 +58,7 @@ export default function RewardedAdComponent({ visible, onReward, onClose }: Prop
         onClose();
         setIsLoaded(false);
         setLoading(false);
-        rewardedAd.load(); // Завантажуємо наступну
+        rewardedAd.load(); // Load next one 
       }
     );
 
@@ -78,7 +78,7 @@ export default function RewardedAdComponent({ visible, onReward, onClose }: Prop
     } else if (loading) {
       Alert.alert('Завантаження', 'Реклама завантажується...');
     } else {
-      // Якщо не завантажилось — даємо бонус відразу
+      // If not downloaded - add bonus at once
       Alert.alert('Нагорода!', 'Ти отримав 100 очок!');
       onReward();
       onClose();

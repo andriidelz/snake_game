@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const UNITY_GAME_ID = 'fc38887a-cf19-44f7-ba89-553a577d5984'; // ← мій Game ID з Unity Ads (безкоштовно)
+const UNITY_GAME_ID = 'fc38887a-cf19-44f7-ba89-553a577d5984'; // ← my Game ID з Unity Ads (free of charge)
 const UNITY_PLACEMENT_ID = 'Rewarded_Web';
 
 export default function RewardedAd({ onReward, onClose }) {
