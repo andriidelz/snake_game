@@ -60,13 +60,22 @@ const Tournaments = ({ playerID }) => {
           <Crown size={60} />
         </h1>
 
+        <div className="text-center mb-8">
+          <button
+            onClick={onBack}
+            className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-2xl rounded-xl shadow-lg transition-all"
+          >
+            ← Повернутися до гри
+          </button>
+        </div>
+
         <div className="space-y-8">
           {tournaments.map(tourn => (
             <div
               key={tourn.id}
               className="relative bg-white/10 backdrop-blur-2xl rounded-3xl p-10 border-4 border-white/20 shadow-2xl hover:shadow-yellow-500/40 transition-all duration-500 overflow-hidden"
             >
-              {/* Іконка типу */}
+              {/* Icon of type */}
               {tourn.type === 'speed' && (
                 <div className="absolute top-6 right-6 animate-pulse">
                   <Zap size={60} color="#fbbf24" />
@@ -120,9 +129,9 @@ const Tournaments = ({ playerID }) => {
                       : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-2xl hover:shadow-green-500/60 hover:scale-110'
                     }
                   `}
-                >
+                >                
                   {tourn.joined ? 'ПРИЄДНАНО' : joining === tourn.id ? 'ПРИЄДНУЮСЬ...' : 'ЗАРЕЄСТРУВАТИСЬ'}
-                </button>
+                </button>                
               </div>
             </div>
           ))}

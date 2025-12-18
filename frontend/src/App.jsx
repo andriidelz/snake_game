@@ -9,6 +9,29 @@ import AdBanner from './components/AdBanner';
 import SkinSelector from './components/SkinSelector';
 import { getStats } from './services/api';
 
+import { WagmiProvider } from 'wagmi';
+import { createConfig } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createWeb3Modal } from '@web3modal/wagmi/react';
+
+const projectId = '2f15da01dce90cbae47e86d2acbf4369';
+
+const wagmiConfig = createConfig({
+  chains: [mainnet],  // or your chain e.g. polygon)
+  transports: {
+    [mainnet.id]: http(),
+  },
+});
+
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  chains: [mainnet],
+});
+
+const queryClient = new QueryClient();
+
 function App() {
   const [stats, setStats] = useState(null);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -115,13 +138,13 @@ function App() {
             {showAchievements ? 'Назад' : 'Досягнення'} 
             </button>
               <button 
-                onClick={() => setShowTournaments(true)}
+                onClick={() => { backToGame(); setShowTournaments(prev => !prev); }}
                 className={`px-6 py-3 rounded-lg font-bold ${showTournaments ? 'bg-red-700' : 'bg-red-600'} text-white flex items-center gap-2`}>
                 {showTournaments ? 'Назад' : 'Турніри'}
             </button>
 
           <button 
-              onClick={() => setShowNFTMint(true)}
+              onClick={() => { backToGame(); setShowNFTMint(true); }}
               className="px-8 py-4 rounded-xl font-bold bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-500 hover:from-yellow-600 hover:to-pink-600 text-white shadow-2xl transform hover:scale-105 transition-all animate-pulse">
               {showNFTMint ? 'Назад' : 'MINT NFT'}
           </button>
@@ -152,8 +175,14 @@ function App() {
           <div className="lg:col-span-1">
             {showLeaderboard ? <Leaderboard onBack={backToGame} />
              : showAchievements ? <Achievements playerID={playerID} onBack={backToGame} />
-             : showTournaments ? <Tournaments playerID={playerID} />
-             : showNFTMint ? <NFTMint /> 
+             : showTournaments ? <Tournaments playerID={playerID} onBack={backToGame} />
+             : showNFTMint ? < (
+                <QueryClientProvider client={queryClient}>
+                  <WagmiProvider config={wagmiConfig}>
+                    <NFTMint onBack={backToGame} />
+                  </WagmiProvider>
+                </QueryClientProvider>
+              ) /> 
              : mode === 'single' ? <Game onStatsUpdate={loadStats} skin={selectedSkin} />
              : <MultiplayerGame playerID={playerID} roomID="global-room-1" />
             }
