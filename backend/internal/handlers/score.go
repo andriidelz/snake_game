@@ -5,15 +5,10 @@ import (
 	"net/http"
 
 	"snake-game/backend/internal/models"
+	"snake-game/backend/internal/storage"
 )
 
-type Storage interface {
-	SaveScore(models.Score) error
-	GetLeaderboard(int) ([]models.Score, error)
-	GetStats() (models.Stats, error)
-}
-
-func SaveScore(store Storage) http.HandlerFunc {
+func SaveScore(store *storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		playerID, ok := r.Context().Value("player_id").(string)
 		if !ok || playerID == "" {
@@ -36,7 +31,7 @@ func SaveScore(store Storage) http.HandlerFunc {
 			return
 		}
 
-		err := store.SaveScore(models.Score{
+		err := store.SaveScore(r.Context(), models.Score{
 			PlayerID: playerID,
 			Score:    req.Score,
 			Length:   req.Length,
@@ -55,3 +50,9 @@ func SaveScore(store Storage) http.HandlerFunc {
 		})
 	}
 }
+
+// type Storage interface {
+// 	SaveScore(models.Score) error
+// 	GetLeaderboard(int) ([]models.Score, error)
+// 	GetStats() (models.Stats, error)
+// }

@@ -52,11 +52,11 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 1G
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '1.5'
+    #       memory: 1G
     restart: unless-stopped
     networks:
       - snake-net
@@ -76,18 +76,18 @@ services:
   #   networks:
   #     - snake-net
 
-  migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    environment:
-      - DATABASE_URL=postgres://snake:snakepass@postgres:5432/snakedb?sslmode=disable
-    depends_on:
-      postgres:
-        condition: service_healthy
-    command: go run backend/migrate.go
-    networks:
-      - snake-net
+  # migrate:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.backend
+  #   environment:
+  #     - DATABASE_URL=postgres://snake:snakepass@postgres:5432/snakedb?sslmode=disable
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   command: go run backend/migrate.go
+  #   networks:
+  #     - snake-net
   
   prometheus:
     image: prom/prometheus:latest

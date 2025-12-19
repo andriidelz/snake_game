@@ -10,7 +10,7 @@ import SkinSelector from './components/SkinSelector';
 import { getStats } from './services/api';
 
 import { WagmiProvider } from 'wagmi';
-import { createConfig } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
@@ -176,13 +176,13 @@ function App() {
             {showLeaderboard ? <Leaderboard onBack={backToGame} />
              : showAchievements ? <Achievements playerID={playerID} onBack={backToGame} />
              : showTournaments ? <Tournaments playerID={playerID} onBack={backToGame} />
-             : showNFTMint ? < (
+             : showNFTMint ? (
                 <QueryClientProvider client={queryClient}>
                   <WagmiProvider config={wagmiConfig}>
                     <NFTMint onBack={backToGame} />
                   </WagmiProvider>
                 </QueryClientProvider>
-              ) /> 
+              )  
              : mode === 'single' ? <Game onStatsUpdate={loadStats} skin={selectedSkin} />
              : <MultiplayerGame playerID={playerID} roomID="global-room-1" />
             }

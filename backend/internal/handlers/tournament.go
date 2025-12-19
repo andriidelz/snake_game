@@ -63,7 +63,7 @@ func CreateTournament(store *storage.PostgresStorage) http.HandlerFunc {
 			Players:    []string{},
 		}
 
-		if err := store.CreateTournament(&t); err != nil {
+		if err := store.CreateTournament(r.Context(), &t); err != nil {
 			http.Error(w, `{"error": "Failed to create tournament"}`, http.StatusInternalServerError)
 			return
 		}
@@ -122,7 +122,7 @@ func JoinTournament(store *storage.PostgresStorage) http.HandlerFunc {
 			return
 		}
 
-		success, msg := store.JoinTournament(req.TournamentID, req.PlayerID)
+		success, msg := store.JoinTournament(r.Context(), req.TournamentID, req.PlayerID)
 		if !success {
 			http.Error(w, `{"error": "`+msg+`"}`, http.StatusBadRequest)
 			return
@@ -145,13 +145,13 @@ func GetTournaments(store *storage.PostgresStorage) http.HandlerFunc {
 
 		switch status {
 		case "waiting":
-			tournaments, err = store.GetWaitingTournaments()
+			tournaments, err = store.GetWaitingTournaments(r.Context())
 		case "active":
-			tournaments, err = store.GetActiveTournaments()
+			tournaments, err = store.GetActiveTournaments(r.Context())
 		case "finished":
-			tournaments, err = store.GetFinishedTournaments()
+			tournaments, err = store.GetFinishedTournaments(r.Context())
 		default:
-			tournaments, err = store.GetAllTournaments()
+			tournaments, err = store.GetAllTournaments(r.Context())
 		}
 
 		if err != nil {

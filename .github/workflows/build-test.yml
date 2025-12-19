@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_USER: snake
           POSTGRES_PASSWORD: snakepass
-          POSTGRES_DB: snake_game
+          POSTGRES_DB: snakedb
         ports:
           - 5432:5432
         options: >-
@@ -55,7 +55,7 @@ jobs:
 
       - name: Run tests with coverage
         env:
-          DATABASE_URL: postgres://snake:snakepass@localhost:5432/snake_game?sslmode=disable
+          DATABASE_URL: postgres://snake:snakepass@localhost:5432/snakedb?sslmode=disable
         run: |
           cd backend
           go test -v -race -covermode=atomic -coverprofile=coverage.out ./...

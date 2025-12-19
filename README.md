@@ -103,3 +103,7 @@ eas build --platform ios - Зібрати IPA (iOS)
 - docker-compose up -d prometheus grafana
 - docker-compose up -d backend prometheus grafana
 - docker-compose up -d backend frontend nginx prometheus grafana
+
+### entrypoint.sh
+
+- chmod +x entrypoint.sh - додати права 1 раз

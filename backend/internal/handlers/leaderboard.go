@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"snake-game/backend/internal/storage"
 	"strconv"
 )
 
-func GetLeaderboard(store Storage) http.HandlerFunc {
+func GetLeaderboard(store *storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		limitStr := r.URL.Query().Get("limit")
 		limit := 10
@@ -17,7 +18,7 @@ func GetLeaderboard(store Storage) http.HandlerFunc {
 			}
 		}
 
-		scores, err := store.GetLeaderboard(limit)
+		scores, err := store.GetLeaderboard(r.Context(), limit)
 		if err != nil {
 			http.Error(w, "Failed to get leaderboard", http.StatusInternalServerError)
 			return

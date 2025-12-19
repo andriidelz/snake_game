@@ -20,7 +20,7 @@ func SaveWallet(store storage.PostgresStorage) http.HandlerFunc {
 			Wallet   string `json:"wallet"`
 		}
 		json.NewDecoder(r.Body).Decode(&req)
-		store.SaveUserWallet(req.PlayerID, req.Wallet)
+		store.SaveUserWallet(r.Context(), req.PlayerID, req.Wallet)
 		w.WriteHeader(http.StatusOK)
 	}
 }
@@ -28,7 +28,7 @@ func SaveWallet(store storage.PostgresStorage) http.HandlerFunc {
 func GetPlayerSkins(store storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		playerID := r.URL.Query().Get("player_id")
-		skins := store.GetPlayerNFTs(playerID)
+		skins := store.GetPlayerNFTs(r.Context(), playerID)
 		json.NewEncoder(w).Encode(skins)
 	}
 }
@@ -39,7 +39,7 @@ func HandleNFTMint(store *storage.PostgresStorage) http.HandlerFunc {
 			PlayerID string `json:"player_id"`
 			Wallet   string `json:"wallet"`
 			Skin     string `json:"skin"`
-			TxHash   string `json:"tx_hash"` // якщо фронт отримує tx після мінту
+			TxHash   string `json:"tx_hash"` // if frot gets tx after mint
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -52,13 +52,13 @@ func HandleNFTMint(store *storage.PostgresStorage) http.HandlerFunc {
 			return
 		}
 
-		if err := store.SaveMintedSkin(req.PlayerID, req.Skin, req.TxHash); err != nil {
+		if err := store.SaveMintedSkin(r.Context(), req.PlayerID, req.Skin, req.TxHash); err != nil {
 			http.Error(w, "failed to save mint", http.StatusInternalServerError)
 			return
 		}
 
 		if req.Wallet != "" {
-			store.SaveUserWallet(req.PlayerID, req.Wallet)
+			store.SaveUserWallet(r.Context(), req.PlayerID, req.Wallet)
 		}
 
 		w.Header().Set("Content-Type", "application/json")

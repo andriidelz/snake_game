@@ -6,24 +6,21 @@ import (
 	"log"
 	"net/http"
 	"snake-game/backend/internal/models"
+	"snake-game/backend/internal/storage"
 )
 
-func GetStats(store Storage) http.HandlerFunc {
+func GetStats(store *storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		stats, err := store.GetStats()
-		if err != nil {
+		stats, err := store.GetStats(ctx)
+		if err != nil && err != sql.ErrNoRows {
 			log.Printf("Error getting stats: %v", err)
 			http.Error(w, "Failed to get stats", http.StatusInternalServerError)
 			return
 		}
 
 		if err == sql.ErrNoRows {
-			stats = models.Stats{
-				TotalGames: 0,
-				AvgScore:   0,
-				MaxScore:   0,
-			}
+			stats = models.Stats{TotalGames: 0, AvgScore: 0, MaxScore: 0}
 		}
 
 		w.Header().Set("Content-Type", "application/json")

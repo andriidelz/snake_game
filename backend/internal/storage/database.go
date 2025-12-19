@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -31,20 +32,20 @@ func NewPostgresStorage(connStr string) (*PostgresStorage, error) {
 	return &PostgresStorage{db: db}, nil
 }
 
-func (s *PostgresStorage) SaveScore(score models.Score) error {
+func (s *PostgresStorage) SaveScore(ctx context.Context, score models.Score) error {
 	query := `INSERT INTO scores (player_id, score, length) VALUES ($1, $2, $3)`
-	_, err := s.db.Exec(query, score.PlayerID, score.Score, score.Length)
+	_, err := s.db.ExecContext(ctx, query, score.PlayerID, score.Score, score.Length)
 	return err
 }
 
-func (s *PostgresStorage) GetLeaderboard(limit int) ([]models.Score, error) {
+func (s *PostgresStorage) GetLeaderboard(ctx context.Context, limit int) ([]models.Score, error) {
 	query := `
         SELECT id, player_id, score, length, timestamp
         FROM scores
         ORDER BY score DESC
         LIMIT $1
     `
-	rows, err := s.db.Query(query, limit)
+	rows, err := s.db.QueryContext(ctx, query, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func (s *PostgresStorage) GetLeaderboard(limit int) ([]models.Score, error) {
 	return scores, nil
 }
 
-func (s *PostgresStorage) GetStats() (models.Stats, error) {
+func (s *PostgresStorage) GetStats(ctx context.Context) (models.Stats, error) {
 	var stats models.Stats
 	query := `
         SELECT
@@ -70,28 +71,28 @@ func (s *PostgresStorage) GetStats() (models.Stats, error) {
             COALESCE(MAX(score), 0) as max_score
         FROM scores
     `
-	err := s.db.QueryRow(query).Scan(&stats.TotalGames, &stats.AvgScore, &stats.MaxScore)
+	err := s.db.QueryRowContext(ctx, query).Scan(&stats.TotalGames, &stats.AvgScore, &stats.MaxScore)
 	return stats, err
 }
 
-func (s *PostgresStorage) UnlockAchievement(playerID, name, description, icon string) error {
+func (s *PostgresStorage) UnlockAchievement(ctx context.Context, playerID, name, description, icon string) error {
 	query := `
         INSERT INTO achievements (player_id, name, description, icon)
         VALUES ($1, $2, $3, $4)
         ON CONFLICT (player_id, name) DO NOTHING
     `
-	_, err := s.db.Exec(query, playerID, name, description, icon)
+	_, err := s.db.ExecContext(ctx, query, playerID, name, description, icon)
 	return err
 }
 
-func (s *PostgresStorage) GetUserAchievements(playerID string) ([]models.Achievement, error) {
+func (s *PostgresStorage) GetUserAchievements(ctx context.Context, playerID string) ([]models.Achievement, error) {
 	query := `
         SELECT id, player_id, name, description, icon, unlocked_at
         FROM achievements
         WHERE player_id = $1
         ORDER BY unlocked_at DESC
     `
-	rows, err := s.db.Query(query, playerID)
+	rows, err := s.db.QueryContext(ctx, query, playerID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +109,8 @@ func (s *PostgresStorage) GetUserAchievements(playerID string) ([]models.Achieve
 	return achs, nil
 }
 
-func (s *PostgresStorage) SaveUserWallet(playerID, wallet string) error {
-	_, err := s.db.Exec(`
+func (s *PostgresStorage) SaveUserWallet(ctx context.Context, playerID, wallet string) error {
+	_, err := s.db.ExecContext(ctx, `
         INSERT INTO wallets (player_id, wallet)
         VALUES ($1, $2)
         ON CONFLICT (player_id) DO UPDATE SET wallet = $2
@@ -117,21 +118,21 @@ func (s *PostgresStorage) SaveUserWallet(playerID, wallet string) error {
 	return err
 }
 
-func (s *PostgresStorage) CreateTournament(t *models.Tournament) error {
+func (s *PostgresStorage) CreateTournament(ctx context.Context, t *models.Tournament) error {
 	query := `
         INSERT INTO tournaments (id, name, max_players, prize, start_time, end_time, status)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
     `
-	_, err := s.db.Exec(query, t.ID, t.Name, t.MaxPlayers, t.Prize, t.StartTime, t.EndTime, t.Status)
+	_, err := s.db.ExecContext(ctx, query, t.ID, t.Name, t.MaxPlayers, t.Prize, t.StartTime, t.EndTime, t.Status)
 	return err
 }
 
-func (s *PostgresStorage) JoinTournament(tournamentID, playerID string) (bool, string) {
+func (s *PostgresStorage) JoinTournament(ctx context.Context, tournamentID, playerID string) (bool, string) {
 	var status string
 	var currentPlayers int
 	var maxPlayers int
 
-	err := s.db.QueryRow(`
+	err := s.db.QueryRowContext(ctx, `
         SELECT status, 
                (SELECT COUNT(*) FROM tournament_players WHERE tournament_id = t.id),
                max_players
@@ -149,7 +150,7 @@ func (s *PostgresStorage) JoinTournament(tournamentID, playerID string) (bool, s
 		return false, "Tournament is full"
 	}
 
-	_, err = s.db.Exec(`
+	_, err = s.db.ExecContext(ctx, `
         INSERT INTO tournament_players (tournament_id, player_id)
         VALUES ($1, $2)
         ON CONFLICT DO NOTHING
@@ -161,12 +162,12 @@ func (s *PostgresStorage) JoinTournament(tournamentID, playerID string) (bool, s
 	return true, ""
 }
 
-func (s *PostgresStorage) getTournamentsByStatus(status string) ([]models.Tournament, error) {
+func (s *PostgresStorage) getTournamentsByStatus(ctx context.Context, status string) ([]models.Tournament, error) {
 	var rows *sql.Rows
 	var err error
 
 	if status == "" {
-		rows, err = s.db.Query(`
+		rows, err = s.db.QueryContext(ctx, `
             SELECT
 				t.id,
 				t.name,
@@ -183,7 +184,7 @@ func (s *PostgresStorage) getTournamentsByStatus(status string) ([]models.Tourna
 			ORDER BY t.created_at DESC
         `)
 	} else {
-		rows, err = s.db.Query(`
+		rows, err = s.db.QueryContext(ctx, `
             SELECT
 				t.id,
 				t.name,
@@ -213,26 +214,26 @@ func (s *PostgresStorage) getTournamentsByStatus(status string) ([]models.Tourna
 			return nil, err
 		}
 
-		// s.db.QueryRow(`SELECT COUNT(*) FROM tournament_players WHERE tournament_id = $1`, t.ID).Scan(&t.CurrentPlayers)
+		s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM tournament_players WHERE tournament_id = $1`, t.ID).Scan(&t.CurrentPlayers)
 		tournaments = append(tournaments, t)
 	}
 	return tournaments, nil
 }
 
-func (s *PostgresStorage) SaveMintedSkin(playerID, skinName, txHash string) error {
+func (s *PostgresStorage) SaveMintedSkin(ctx context.Context, playerID, skinName, txHash string) error {
 	query := `
 		INSERT INTO player_minted_skins (player_id, skin_name, tx_hash)
 		VALUES ($1, $2, $3)
 		ON CONFLICT (player_id, skin_name) DO UPDATE SET tx_hash = EXCLUDED.tx_hash
 	`
-	_, err := s.db.Exec(query, playerID, skinName, txHash)
+	_, err := s.db.ExecContext(ctx, query, playerID, skinName, txHash)
 	return err
 }
 
-func (s *PostgresStorage) GetPlayerNFTs(playerID string) []string {
+func (s *PostgresStorage) GetPlayerNFTs(ctx context.Context, playerID string) []string {
 	var skins []string
 	query := `SELECT skin_name FROM player_skins WHERE player_id = $1`
-	rows, err := s.db.Query(query, playerID)
+	rows, err := s.db.QueryContext(ctx, query, playerID)
 	if err != nil {
 		// фейк, якщо помилка
 		return []string{"default", "golden", "neon", "crypto"}
@@ -251,20 +252,20 @@ func (s *PostgresStorage) GetPlayerNFTs(playerID string) []string {
 	return skins
 }
 
-func (s *PostgresStorage) GetAllTournaments() ([]models.Tournament, error) {
-	return s.getTournamentsByStatus("")
+func (s *PostgresStorage) GetAllTournaments(ctx context.Context) ([]models.Tournament, error) {
+	return s.getTournamentsByStatus(ctx, "")
 }
 
-func (s *PostgresStorage) GetWaitingTournaments() ([]models.Tournament, error) {
-	return s.getTournamentsByStatus("waiting")
+func (s *PostgresStorage) GetWaitingTournaments(ctx context.Context) ([]models.Tournament, error) {
+	return s.getTournamentsByStatus(ctx, "waiting")
 }
 
-func (s *PostgresStorage) GetActiveTournaments() ([]models.Tournament, error) {
-	return s.getTournamentsByStatus("active")
+func (s *PostgresStorage) GetActiveTournaments(ctx context.Context) ([]models.Tournament, error) {
+	return s.getTournamentsByStatus(ctx, "active")
 }
 
-func (s *PostgresStorage) GetFinishedTournaments() ([]models.Tournament, error) {
-	return s.getTournamentsByStatus("finished")
+func (s *PostgresStorage) GetFinishedTournaments(ctx context.Context) ([]models.Tournament, error) {
+	return s.getTournamentsByStatus(ctx, "finished")
 }
 
 func (s *PostgresStorage) Close() error {

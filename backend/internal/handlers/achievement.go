@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"snake-game/backend/internal/models"
+	"snake-game/backend/internal/storage"
 )
 
 type UnlockAchievementRequest struct {
@@ -14,9 +15,7 @@ type UnlockAchievementRequest struct {
 	Icon        string `json:"icon"`
 }
 
-func UnlockAchievement(store interface {
-	UnlockAchievement(playerID, name, description, icon string) error
-}) http.HandlerFunc {
+func UnlockAchievement(store *storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req UnlockAchievementRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -29,7 +28,7 @@ func UnlockAchievement(store interface {
 			return
 		}
 
-		err := store.UnlockAchievement(req.PlayerID, req.Name, req.Description, req.Icon)
+		err := store.UnlockAchievement(r.Context(), req.PlayerID, req.Name, req.Description, req.Icon)
 		if err != nil {
 			http.Error(w, "Failed to unlock achievement", http.StatusInternalServerError)
 			return
@@ -44,9 +43,7 @@ func UnlockAchievement(store interface {
 	}
 }
 
-func GetAchievements(store interface {
-	GetUserAchievements(playerID string) ([]models.Achievement, error)
-}) http.HandlerFunc {
+func GetAchievements(store *storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		playerID := r.URL.Query().Get("player_id")
 		if playerID == "" {
@@ -54,7 +51,7 @@ func GetAchievements(store interface {
 			return
 		}
 
-		achievements, err := store.GetUserAchievements(playerID)
+		achievements, err := store.GetUserAchievements(r.Context(), playerID)
 		if err != nil {
 			http.Error(w, "Failed to get achievements", http.StatusInternalServerError)
 			return

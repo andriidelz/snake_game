@@ -5,11 +5,11 @@ export default defineConfig({
   plugins: [react()],
   base: '/',
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],  // для React файлів
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],  // для React files
   },
   server: {
     port: 3000,
-    host: true, // важливо для Docker і мобілки
+    host: true, // important for Docker and mobile devices
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -28,6 +28,6 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true, // для дебагу в продакшні
+    sourcemap: true, // for debugging in production
   },
 });
