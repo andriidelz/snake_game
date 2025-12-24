@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"snake-game/backend/internal/telemetry/logger"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -17,19 +18,23 @@ func main() {
 	}
 	defer cfg.Store.Close()
 
+	log.Println("✅ Config loaded successfully")
+	log.Println("✅ Database connection established")
+
 	router := mux.NewRouter()
 	SetupRoutes(router, cfg.Store)
 
+	log.Println("✅ Routes registered")
 	log.Printf("Snake Game API starting on :%s", cfg.Port)
 	log.Printf("Metrics: http://localhost:%s/metrics", cfg.Port)
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           router, // ← просто mux роутер!
-		ReadTimeout:       15,
-		WriteTimeout:      15,
-		IdleTimeout:       60,
-		ReadHeaderTimeout: 10,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

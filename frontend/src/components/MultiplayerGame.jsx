@@ -1,36 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react'; 
 import { connectWS } from '../services/websocket';
+import { sound } from '../utils/sound';
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
 const INITIAL_DIRECTION = { x: 1, y: 0 };
 
-const MultiplayerGame = ({ playerID, roomID }) => {
+const MultiplayerGame = ({ playerID, roomID, onBack }) => {
   const [snakes, setSnakes] = useState({});
   const [food, setFood] = useState([15, 15]);
   const [ws, setWs] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false); 
   const [gameOver, setGameOver] = useState(false); 
+  const [connected, setConnected] = useState(false);
   const directionRef = useRef(INITIAL_DIRECTION); 
   const canChangeDirection = useRef(true); 
 
   useEffect(() => {
     const socket = connectWS(roomID, playerID, (data) => {
-      setSnakes(data.snakes);
-      setFood(data.food);
+      setSnakes(data.snakes || {});
+      setFood(data.food || [15, 15]);
     });
+
+    socket.onopen = () => setConnected(true);
+    socket.onerror = () => setConnected(false);
+    socket.onclose = () => setConnected(false);
+
     setWs(socket);
     return () => socket.close();
   }, [roomID, playerID]);
 
   const sendDirection = React.useCallback((dir) => {
-    if (ws) ws.send(JSON.stringify(dir));
+    if (ws && ws.readyState === WebSocket.OPEN)
+      ws.send(JSON.stringify(dir));
   }, [ws]);
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (!isPlaying || !canChangeDirection.current) return;
+      if (!isPlaying || !canChangeDirection.current || !connected) return;
       const keyMap = {
         ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 },
         ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 },
@@ -49,9 +57,15 @@ const MultiplayerGame = ({ playerID, roomID }) => {
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, sendDirection]);
+  }, [isPlaying, sendDirection, connected]);
+
+  useEffect(() => {
+    if (isPlaying) sound.playBackground();
+    else sound.pauseBackground();
+  }, [isPlaying]);
 
   const startGame = () => {
+    if (!connected) return;
     setIsPlaying(true);
     setGameOver(false);
     canChangeDirection.current = true;
@@ -70,9 +84,28 @@ const MultiplayerGame = ({ playerID, roomID }) => {
     if (ws) ws.send(JSON.stringify({ type: 'reset' }));
   };
 
+  if (!connected) {
+    return (
+      <div className="p-8 text-center text-white">
+        <h2 className="text-4xl mb-8">Підключення до сервера...</h2>
+        <p className="text-xl mb-8">Перевір підключення або спробуй пізніше</p>
+        <button onClick={onBack} className="btn-neon text-xl">
+          ← Повернутися до гри
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white/5 backdrop-blur rounded-lg p-6">
-      {/* ОНЛАЙН ГРАВЦІ — ОНОВЛЕНО! */}
+    <div className="p-8 text-center text-white">
+      {/* КНОПКА НАЗАД — ДОДАНО! */}
+      <button
+        onClick={onBack}
+        className="btn-neon text-xl mb-8 block mx-auto"
+      >
+        ← Повернутися до гри
+      </button>
+
     <h2 className="text-4xl text-yellow-400 mb-4 font-bold text-center">
       Мультиплеєр • <span className="text-pink-400 animate-pulse">{Object.keys(snakes).length}</span> онлайн
     </h2>

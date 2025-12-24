@@ -46,6 +46,12 @@ const Tournaments = ({ playerID }) => {
           <Trophy size={120} className="mx-auto text-yellow-600 mb-8" />
           <p className="text-white/80 text-3xl font-bold">Турніри скоро з'являться!</p>
           <p className="text-white/60 text-xl mt-4">Готуйся до битви за славу</p>
+          <button
+            onClick={onBack}
+            className="mt-8 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition-all"
+          >
+            ← Повернутися до гри
+          </button>
         </div>
       </div>
     );

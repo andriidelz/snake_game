@@ -138,7 +138,7 @@ function App() {
             {showAchievements ? 'Назад' : 'Досягнення'} 
             </button>
               <button 
-                onClick={() => { backToGame(); setShowTournaments(prev => !prev); }}
+                onClick={() => { backToGame(); setShowTournaments(true); }}
                 className={`px-6 py-3 rounded-lg font-bold ${showTournaments ? 'bg-red-700' : 'bg-red-600'} text-white flex items-center gap-2`}>
                 {showTournaments ? 'Назад' : 'Турніри'}
             </button>
@@ -170,7 +170,7 @@ function App() {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="hidden lg:block">
             <AdBanner type="vertical" position="left" />
-          </div>
+          </div>  
 
           <div className="lg:col-span-1">
             {showLeaderboard ? <Leaderboard onBack={backToGame} />
@@ -184,7 +184,7 @@ function App() {
                 </QueryClientProvider>
               )  
              : mode === 'single' ? <Game onStatsUpdate={loadStats} skin={selectedSkin} />
-             : <MultiplayerGame playerID={playerID} roomID="global-room-1" />
+             : <MultiplayerGame playerID={playerID} roomID="global-room-1" onBack={backToGame} />
             }
           </div>
 

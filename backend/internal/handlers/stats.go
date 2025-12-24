@@ -11,6 +11,7 @@ import (
 
 func GetStats(store *storage.PostgresStorage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Received request to /api/stats from", r.RemoteAddr)
 		ctx := r.Context()
 		stats, err := store.GetStats(ctx)
 		if err != nil && err != sql.ErrNoRows {
