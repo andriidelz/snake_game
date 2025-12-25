@@ -28,19 +28,12 @@
     },
     "web": {
       "favicon": "./assets/icons/favicon.png"
-    },
-    "plugins": [
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
-        }
-      ]
-    ],
+    },    
     "extra": {
+      "apiUrl": "http://192.168.0.148:8080/api",
+      "wsUrl": "ws://192.168.0.148:8080/api/multiplayer/ws",
       "eas": {
-        "projectId": "твій-eas-project-id (якщо будеш публікувати)"
+        "projectId": "твій-eas-project-id"
       }
     }
   }

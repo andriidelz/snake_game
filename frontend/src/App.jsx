@@ -15,7 +15,7 @@ import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWeb3Modal } from '@web3modal/wagmi/react';
 
-const projectId = '2f15da01dce90cbae47e86d2acbf4369';
+const projectId = 'fc38887a-cf19-44f7-ba89-553a577d5984';
 
 const wagmiConfig = createConfig({
   chains: [mainnet],  // or your chain e.g. polygon)

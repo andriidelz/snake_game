@@ -1,4 +1,3 @@
-// mobile/src/utils/metrics.ts
 import { EXPO_PUBLIC_API_URL } from '@env';
 
 interface MetricData {
@@ -20,7 +19,6 @@ export const trackEvent = async (event: string, data: MetricData = {}) => {
       }),
     });
   } catch (error) {
-    // Не падаємо — це аналітика, не критична логіка
     console.debug('Metrics failed:', error);
   }
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Web3Modal } from '@web3modal/wagmi-react-native';
@@ -7,7 +7,6 @@ import { polygon, sepolia } from 'wagmi/chains';
 import { walletConnect } from 'wagmi/connectors';
 
 import { sound } from './src/utils/sound';
-import { register } from 'prom-client';
 
 const projectId = 'твій_project_id_тут'; // ← change for your own one of course  
 
@@ -58,15 +57,15 @@ useEffect(() => {
     loadSounds();
   }, []);
 
-  if (__DEV__) {
-  const metricsServer = http.createServer(async (req, res) => {
-    if (req.url === '/metrics') {
-      res.setHeader('Content-Type', register.contentType);
-      res.end(await register.metrics());
-    }
-  });
-  metricsServer.listen(8081);
-}
+//   if (__DEV__) {
+//   const metricsServer = http.createServer(async (req, res) => {
+//     if (req.url === '/metrics') {
+//       res.setHeader('Content-Type', register.contentType);
+//       res.end(await register.metrics());
+//     }
+//   });
+//   metricsServer.listen(8081);
+// }
 
   return (
     <WagmiProvider config={wagmiConfig.wagmiConfig}>
@@ -77,8 +76,9 @@ useEffect(() => {
             {props => <Game {...props} playerID={playerID} />}
           </Stack.Screen>
           <Stack.Screen name="Multiplayer" component={MultiplayerGame} options={{ title: 'Мультиплеєр' }} />
-          <Stack.Screen name="Tournament" component={Tournament} options={{ title: 'Турніри' }} />
-            {() => <Tournaments playerID={playerID} />}
+          <Stack.Screen name="Tournament" options={{ title: 'Турніри' }}>
+             {props => <Tournament {...props} playerID={playerID} />}
+          </Stack.Screen>
           <Stack.Screen name="Leaderboard" component={Leaderboard} options={{ title: 'Лідери' }} />
           <Stack.Screen name="Achievements">
             {() => <Achievements playerID={playerID} />}

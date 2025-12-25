@@ -22,7 +22,10 @@ func MultiplayerWS(store interface{}) http.HandlerFunc {
 		}
 		roomID := r.URL.Query().Get("room")
 		playerID := r.URL.Query().Get("player")
+
 		room := multiplayer.GetOrCreateRoom(roomID, store)
 		room.AddPlayer(playerID, conn)
+
+		room.StartGameLoop()
 	}
 }

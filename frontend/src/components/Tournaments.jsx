@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trophy, Users, Timer, Zap, Crown, Flame } from 'lucide-react';
 import { getTournaments, joinTournament } from '../services/api';
 
-const Tournaments = ({ playerID }) => {
+const Tournaments = ({ playerID, onBack = () => window.history.back() }) => {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(null);
@@ -42,12 +42,12 @@ const Tournaments = ({ playerID }) => {
   if (!tournaments || tournaments.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center mb-8">
           <Trophy size={120} className="mx-auto text-yellow-600 mb-8" />
           <p className="text-white/80 text-3xl font-bold">Турніри скоро з'являться!</p>
           <p className="text-white/60 text-xl mt-4">Готуйся до битви за славу</p>
           <button
-            onClick={onBack}
+            onClick={onBack || (() => window.history.back())}
             className="mt-8 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition-all"
           >
             ← Повернутися до гри
@@ -67,12 +67,13 @@ const Tournaments = ({ playerID }) => {
         </h1>
 
         <div className="text-center mb-8">
+          {onBack &&
           <button
             onClick={onBack}
             className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-2xl rounded-xl shadow-lg transition-all"
           >
             ← Повернутися до гри
-          </button>
+          </button>}
         </div>
 
         <div className="space-y-8">

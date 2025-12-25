@@ -61,12 +61,13 @@ export default function NFTMint() {
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 flex items-center justify-center p-6">
       <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-12 max-w-2xl text-center border border-white/20 shadow-2xl">
         {/* Кнопка назад */}
+        {onBack &&
         <button 
-          onClick={onBack} 
-          className="btn-neon mb-8 text-xl w-full max-w-xs"
+          onClick={onBack || (() => window.history.back())} 
+          className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-bold text-2xl rounded-xl shadow-lg transition-all"
         >
           ← Назад до гри
-        </button>
+        </button>}
         <h2 className="text-6xl font-bold text-yellow-400 mb-8 drop-shadow-lg">
           Legendary Golden Snake
         </h2>

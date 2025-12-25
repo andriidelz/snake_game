@@ -1,24 +1,45 @@
 let socket: WebSocket | null = null;
 
-export const connectWS = (playerID: string, roomID: string = "global-mobile", onUpdate: (data: any) => void) => {
-  const wsUrl = process.env.EXPO_PUBLIC_WS_URL || 'ws://192.168.1.100:8080/ws';
-  socket = new WebSocket(`${wsUrl}?player=${playerID}&room=${roomID}`);
+export const connectWS = (playerID: string, roomID: string = "global-room-1", onUpdate: (data: any) => void) => {
+  const baseUrl = process.env.EXPO_PUBLIC_WS_URL || 'ws://192.168.0.148:8080/ws';
+  socket = new WebSocket(`${baseUrl}?player=${playerID}&room=${roomID}`);
 
-  socket.onopen = () => console.log('WS connected');
-  socket.onmessage = (e) => onUpdate(JSON.parse(e.data));
+  socket.onopen = () => console.log('WS connected (mobile)');
+  socket.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      onUpdate(data);
+    } catch (err) {
+      console.log('Invalid message', e.data);
+    }
+  };
+
   socket.onerror = (e) => console.log('WS error', e);
-  socket.onclose = () => console.log('WS closed');
+  socket.onclose = () => {
+    console.log('WebSocket closed');
+    socket = null;
+  };
 
   return socket;
 };
 
-export const sendDirection = (dir: { x: number; y: number }) => {
-  if (socket?.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify(dir));
+export const sendMessage = (msg: any) => {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(msg));
   }
 };
 
+export const sendDirection = (dir: { x: number; y: number }) => {
+  sendMessage({ dir });
+};
+
+export const sendCommand = (type: 'start' | 'pause' | 'reset') => {
+  sendMessage({ type });
+};
+
 export const disconnectWS = () => {
-  socket?.close();
-  socket = null;
+  if (socket) {
+    socket.close();
+    socket = null;
+  }
 };

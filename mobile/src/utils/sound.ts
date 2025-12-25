@@ -54,10 +54,10 @@ class SoundManager {
 export const sound = new SoundManager();
 
 const loadSounds = async () => {
-  await sound.load('eat', require('../assets/sounds/eat.mp3'));
-  await sound.load('game-over', require('../assets/sounds/game-over.mp3'));
-  await sound.load('achievement', require('../assets/sounds/achievement.mp3'));
-  await sound.load('powerup', require('../assets/sounds/powerup.mp3'));
+  await sound.load('eat', require('../../assets/sounds/eat.mp3'));
+  await sound.load('game-over', require('../../assets/sounds/game-over.mp3'));
+  await sound.load('achievement', require('../../assets/sounds/achievement.mp3'));
+  await sound.load('powerup', require('../../assets/sounds/powerup.mp3'));
 };
 
 loadSounds(); 

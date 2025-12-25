@@ -1,74 +1,111 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react'; 
 import { connectWS } from '../services/websocket';
 import { sound } from '../utils/sound';
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
-const INITIAL_DIRECTION = { x: 1, y: 0 };
+// const INITIAL_DIRECTION = { x: 1, y: 0 };
+// const GAME_SPEED = 150;
 
 const MultiplayerGame = ({ playerID, roomID, onBack }) => {
   const [snakes, setSnakes] = useState({});
   const [food, setFood] = useState([15, 15]);
+  const [powerUps, setPowerUps] = useState([]);
   const [ws, setWs] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false); 
   const [gameOver, setGameOver] = useState(false); 
   const [connected, setConnected] = useState(false);
-  const directionRef = useRef(INITIAL_DIRECTION); 
-  const canChangeDirection = useRef(true); 
+  const directionRef = useRef({ x: 1, y: 0 }); 
+  // const canChangeDirection = useRef(true); 
+  const prevFoodRef = useRef(food);
+  const prevPowerUpsRef = useRef(0);
 
   useEffect(() => {
     const socket = connectWS(roomID, playerID, (data) => {
-      setSnakes(data.snakes || {});
-      setFood(data.food || [15, 15]);
+      if (data.snakes) setSnakes(data.snakes);
+      if (data.food) setFood(data.food);
+      if (data.powerUps !== undefined) setPowerUps(data.powerUps);
+      if (data.gameOver !== undefined) setGameOver(data.gameOver);
     });
 
     socket.onopen = () => setConnected(true);
     socket.onerror = () => setConnected(false);
     socket.onclose = () => setConnected(false);
-
     setWs(socket);
+
     return () => socket.close();
   }, [roomID, playerID]);
 
-  const sendDirection = React.useCallback((dir) => {
-    if (ws && ws.readyState === WebSocket.OPEN)
-      ws.send(JSON.stringify(dir));
-  }, [ws]);
+  const sendDirection = (dir) => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ dir }));
+    }
+  };
 
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (!isPlaying || !canChangeDirection.current || !connected) return;
+      if (!connected || gameOver) return;
+
       const keyMap = {
-        ArrowUp: { x: 0, y: -1 }, ArrowDown: { x: 0, y: 1 },
-        ArrowLeft: { x: -1, y: 0 }, ArrowRight: { x: 1, y: 0 },
-        w: { x: 0, y: -1 }, s: { x: 0, y: 1 },
-        a: { x: -1, y: 0 }, d: { x: 1, y: 0 }
+        ArrowUp: { x: 0, y: -1 },
+        ArrowDown: { x: 0, y: 1 },
+        ArrowLeft: { x: -1, y: 0 },
+        ArrowRight: { x: 1, y: 0 },
+        w: { x: 0, y: -1 },
+        s: { x: 0, y: 1 },
+        a: { x: -1, y: 0 },
+        d: { x: 1, y: 0 },
       };
+
       const newDir = keyMap[e.key];
       if (newDir) {
         e.preventDefault();
-        if (newDir.x !== -directionRef.current.x || newDir.y !== -directionRef.current.y) {
-          sendDirection(newDir); // Send to WS instead of setDirection
+        if (newDir.x !== -directionRef.current.x || newDir.y !== -directionRef.current.y) {          
           directionRef.current = newDir;
-          canChangeDirection.current = false;
+          sendDirection(newDir);
         }
       }
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [isPlaying, sendDirection, connected]);
+  }, [connected, gameOver]);
+
+  // useEffect(() => {
+  //   if (!isPlaying || !connected) return;
+  //   const interval = setInterval(() => {
+  //     canChangeDirection.current = true; // дозволяємо зміну після тику
+  //   }, GAME_SPEED);
+  //   return () => clearInterval(interval);
+  // }, [isPlaying, connected]);
 
   useEffect(() => {
-    if (isPlaying) sound.playBackground();
-    else sound.pauseBackground();
+    if (prevFoodRef.current && (prevFoodRef.current[0] !== food[0] || prevFoodRef.current[1] !== food[1])) {
+      sound.play('eat');
+    }
+    prevFoodRef.current = food;
+  }, [food]);
+
+  useEffect(() => {
+    if (prevPowerUpsLengthRef.current > powerUps.length) {
+      sound.play('powerup');
+    }
+    prevPowerUpsLengthRef.current = powerUps.length;
+  }, [powerUps]);
+
+  useEffect(() => {
+    if (isPlaying) {
+      sound.playBackground();
+    } else {
+      sound.pauseBackground();
+    }
   }, [isPlaying]);
 
   const startGame = () => {
     if (!connected) return;
     setIsPlaying(true);
     setGameOver(false);
-    canChangeDirection.current = true;
+    // canChangeDirection.current = true;
     if (ws) ws.send(JSON.stringify({ type: 'start' }));
   };
 
@@ -80,7 +117,7 @@ const MultiplayerGame = ({ playerID, roomID, onBack }) => {
   const resetGame = () => {
     setIsPlaying(false);
     setGameOver(false);
-    canChangeDirection.current = true;
+    // canChangeDirection.current = true;
     if (ws) ws.send(JSON.stringify({ type: 'reset' }));
   };
 
@@ -139,7 +176,7 @@ const MultiplayerGame = ({ playerID, roomID, onBack }) => {
       </div>
 
       {/* Game Board (fixed incomplete JSX) */}
-      <div className="flex justify-center mb-4">
+      <div className="flex justify-center">
         <div
           className="relative bg-gray-900 rounded-lg shadow-2xl"
           style={{
@@ -178,6 +215,22 @@ const MultiplayerGame = ({ playerID, roomID, onBack }) => {
               boxShadow: '0 0 10px #ef4444'
             }}
           />
+          {/* Power-ups */}
+          {powerUps.map((p, i) => (
+            <div
+              key={`power-${i}`}
+              className="absolute animate-bounce"
+              style={{
+                left: p[0] * CELL_SIZE + 1,
+                top: p[1] * CELL_SIZE + 1,
+                width: CELL_SIZE - 2,
+                height: CELL_SIZE - 2,
+                backgroundColor: '#ffd700',
+                borderRadius: '50%',
+                boxShadow: '0 0 20px #ffd700'
+              }}
+            />
+          ))}
           {gameOver && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/80 rounded-lg">
               <div className="text-center">

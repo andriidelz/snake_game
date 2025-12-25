@@ -77,6 +77,7 @@ npm start
 cd mobile && expo start - локально тестувати
 eas build --platform android - зібрати АРК (Android)
 eas build --platform ios - Зібрати IPA (iOS)
+npm install --legacy-peer-deps
 ```
 
 - Опублікувати в сториЧерез Expo Application Services (EAS)
@@ -107,3 +108,7 @@ eas build --platform ios - Зібрати IPA (iOS)
 ### entrypoint.sh
 
 - chmod +x entrypoint.sh - додати права 1 раз
+
+## Test on mobile phone
+
+- bash: ipconfig (Windows) або ifconfig / ip a (Mac/Linux)
