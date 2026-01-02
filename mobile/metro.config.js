@@ -19,12 +19,10 @@ config.resolver.extraNodeModules = {
   stream: require.resolve('stream-browserify'),
   buffer: require.resolve('buffer/'),
   crypto: require.resolve('react-native-crypto'),
-
   '@noble/hashes/crypto': path.resolve(__dirname, 'node_modules/@noble/hashes/crypto.js'),
 };   
 
 config.resolver.nodeModulesPaths = [path.resolve(__dirname, 'node_modules')];
-
 config.resolver.unstable_enableSymlinks = true;
 config.resolver.unstable_enablePackageExports = true;
 
