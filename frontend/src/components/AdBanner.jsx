@@ -17,8 +17,8 @@ const AdBanner = ({ type = 'horizontal' }) => {
     <ins
       className={`adsbygoogle ${bannerStyles[type]} flex items-center justify-center rounded-lg shadow-lg`}      
       style={{ display: 'block' }}
-      data-ad-client="ca-pub-3940256099942544" // ← замінить на свій реальний!
-      data-ad-slot="1234567890"               // ← замінить тоже на свій слот!
+      data-ad-client="ca-pub-5811327077406599" // ← замінив на свій реальний!
+      data-ad-slot="9086971079"               // ← замінив тоже на свій слот!
       data-ad-format="auto"
       data-full-width-responsive="true"
     ></ins>

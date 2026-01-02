@@ -31,7 +31,7 @@ export default function Game({ navigation, playerID }: { navigation: any; player
   const [showAdBreak, setShowAdBreak] = useState(false);
   const [showRewardedAd, setShowRewardedAd] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const intervalRef = useRef<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [gameOver, setGameOver] = useState(false);
 
   const [currentSkin, setCurrentSkin] = useState<Skin>({
@@ -73,28 +73,7 @@ export default function Game({ navigation, playerID }: { navigation: any; player
     if (type === 'shield') setActiveEffects(prev => [...prev, 'shield']), setTimeout(() => setActiveEffects(prev => prev.filter(e => e !== 'shield')), 10000);
     if (type === 'magnet') setActiveEffects(prev => [...prev, 'magnet']), setTimeout(() => setActiveEffects(prev => prev.filter(e => e !== 'magnet')), 8000);
     if (type === 'double') setScoreMultiplier(2), setActiveEffects(prev => [...prev, 'double']), setTimeout(() => { setScoreMultiplier(1); setActiveEffects(prev => prev.filter(e => e !== 'double')); }, 10000);
-  };
-
-  // const watchRewardedAd = async () => {
-  //   setShowRewardedAd(true);
-  //   try {
-  //     await AdMobRewarded.showAdAsync({
-  //       adUnitID: 'ca-app-pub-3940256099942544/5224354917', // Тестовий ID (замінить на свій потом)
-  //       isTestDevice: true,
-  //     });
-  //     // Реклама переглянута — НАГОРОДА!
-  //     setScore(s => s + 100);
-  //     Vibration.vibrate(200);
-  //     sound.play('achievement');
-  //     setIsPlaying(true); // Revive!
-  //     setGameOver(false); // Скидаємо gameOver
-  //   } catch (error) {
-  //     console.log('Ad failed:', error);
-  //     setScore(s => s + 50);
-  //   } finally {
-  //     setShowRewardedAd(false);
-  //   }
-  // };
+  };  
 
   const gameLoop = useCallback(() => {
     setSnake(current => {

@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet, Alert, Platform } from 'react-native';
 import { RewardedAd, RewardedAdEventType, TestIds } from 'react-native-google-mobile-ads';
 import { AdEventType } from 'react-native-google-mobile-ads';
 import { sound } from '../utils/sound';
 
-const AD_UNIT_ID = __DEV__ ? TestIds.REWARDED : 'mY-real-id';
+const isDev = __DEV__;
+
+const androidRewardedId = isDev 
+  ? TestIds.REWARDED 
+  : 'ca-app-pub-5811327077406599/5691847709'; // Твій реальний Android Rewarded ID
+
+const iosRewardedId = isDev 
+  ? TestIds.REWARDED 
+  : 'ca-app-pub-5811327077406599/4730119824'; // Твій реальний iOS Rewarded ID
+
+const AD_UNIT_ID = Platform.OS === 'ios' ? iosRewardedId : androidRewardedId;
 
 interface Props {
   visible: boolean;

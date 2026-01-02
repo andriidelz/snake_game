@@ -41,6 +41,8 @@ cd snake-game
 
 # Запустіть через Docker Compose
 docker-compose up -d
+docker-compose up --build backend postgres
+docker-compose up --build backend frontend postgres
 
 # Доступ:
 # Frontend: http://localhost:3000
@@ -78,6 +80,12 @@ cd mobile && expo start - локально тестувати
 eas build --platform android - зібрати АРК (Android)
 eas build --platform ios - Зібрати IPA (iOS)
 npm install --legacy-peer-deps
+npx expo start --lan --clear - використовує локальну мережу (твій IP 192.168.0.148 — ідеально для телефону в тій самій Wi-Fi)
+npx expo start --tunnel --clear - через ngrok (працює навіть якщо телефон в іншій мережі)
+npx expo run:android
+npx expo run:ios
+eas build --platform android --profile preview
+eas build --platform ios --profile preview
 ```
 
 - Опублікувати в сториЧерез Expo Application Services (EAS)

@@ -1,12 +1,19 @@
-import { EXPO_PUBLIC_API_URL } from '@env';
+// import { EXPO_PUBLIC_API_URL } from '@env';
 
 interface MetricData {
   [key: string]: any;
 }
 
 export const trackEvent = async (event: string, data: MetricData = {}) => {
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   try {
-    await fetch(`${EXPO_PUBLIC_API_URL}/metrics/mobile`, {
+    if (!apiUrl) {
+      console.debug('Metrics: API URL not found in environment');
+      return;
+    }
+
+    await fetch(`${apiUrl}/metrics/mobile`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

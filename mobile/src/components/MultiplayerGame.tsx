@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Play, Pause, RotateCcw } from 'lucide-react-native';
-import { connectWS, sendCommand, disconnectWS, sendDirection } from '../services/websocket';
+import { connectWS, sendCommand, disconnectWS, sendMessage, sendDirection } from '../services/websocket';
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 20;
 
 export default function MultiplayerGame({ route }: { route: any }) {
   const playerID = route.params?.playerID || 'mobile_' + Date.now();
+  const roomID = 'global-room-1';
 
   const [gameState, setGameState] = useState<{
     snakes: Record<string, number[][]>;
@@ -19,11 +20,13 @@ export default function MultiplayerGame({ route }: { route: any }) {
     food: [10, 10],
     powerups: [],
   });
-  const [isPlaying, setIsPlaying] = useState(true);
+  // const [isPlaying, setIsPlaying] = useState(true);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const ws = connectWS("global-room-1", playerID, (data) => {
+    console.log('Connecting WS for player:', playerID);
+    const ws = connectWS(roomID, playerID, (data) => {
+      console.log('Received game state:', data);
       setGameState(data);
       setConnected(true);
     });
@@ -31,14 +34,10 @@ export default function MultiplayerGame({ route }: { route: any }) {
     return () => disconnectWS();
   }, [playerID]);
 
-//   const handleDirection = (dir: { x: number; y: number }) => {
-//   sendDirection(dir);
-// };
-
-const togglePause = () => {
-  setIsPlaying(prev => !prev);
-  sendCommand(isPlaying ? 'pause' : 'start');
-};
+const sendDirection = (dir: { x: number; y: number }) => {
+    console.log('Sending direction:', dir);
+    sendMessage({ dir });
+  };
 
 const resetGame = () => {
   sendCommand('reset');
@@ -114,43 +113,27 @@ const resetGame = () => {
             </TouchableOpacity>
           </View>
         )}
-      </View>
+      </View>    
 
       {/* Керування */}
       <View style={styles.controls}>
         {/* Вгору */}
-        <TouchableOpacity
-          onPress={() => sendDirection({ x: 0, y: -1 })}
-          style={styles.dirBtn}
-        >
+        <TouchableOpacity onPress={() => sendDirection({ x: 0, y: -1 })} style={styles.dirBtn}>        
           <Text style={styles.dirText}>↑</Text>
         </TouchableOpacity>
 
         <View style={{ flexDirection: 'row', gap: 20 }}>
-          <TouchableOpacity
-            onPress={() => sendDirection({ x: -1, y: 0 })}
-            style={styles.dirBtn}
-          >
+          <TouchableOpacity onPress={() => sendDirection({ x: -1, y: 0 })} style={styles.dirBtn}>          
             <Text style={styles.dirText}>←</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>          
 
-          <TouchableOpacity onPress={togglePause} style={styles.dirBtn}>
-            {isPlaying ? <Pause size={36} color="white" /> : <Play size={36} color="white" />}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => sendDirection({ x: 1, y: 0 })}
-            style={styles.dirBtn}
-          >
+          <TouchableOpacity onPress={() => sendDirection({ x: 1, y: 0 })} style={styles.dirBtn}>
             <Text style={styles.dirText}>→</Text>
           </TouchableOpacity>
         </View>
 
         {/* Вниз */}
-        <TouchableOpacity
-          onPress={() => sendDirection({ x: 0, y: 1 })}
-          style={styles.dirBtn}
-        >
+        <TouchableOpacity onPress={() => sendDirection({ x: 0, y: 1 })} style={styles.dirBtn}>        
           <Text style={styles.dirText}>↓</Text>
         </TouchableOpacity>
       </View>
@@ -160,6 +143,9 @@ const resetGame = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#064e3b', paddingTop: 40, alignItems: 'center' },
+  buttonRow: { flexDirection: 'row', gap: 20, marginBottom: 20 },
+  controlBtn: { backgroundColor: '#10b981', padding: 16, borderRadius: 12, alignItems: 'center' },
+  btnText: { color: 'white', fontSize: 16, marginTop: 8 },
   title: { color: '#fbbf24', fontSize: 26, fontWeight: 'bold', marginBottom: 20 },
   board: {
     width: GRID_SIZE * CELL_SIZE + 20,
